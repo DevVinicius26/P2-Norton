@@ -1,0 +1,63 @@
+<div class="container my-4" style="max-width: 600px;">
+    <div class="card shadow-sm rounded-4 p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="mb-0">Meus Dados</h3>
+            <a routerLink="/" class="btn btn-outline-secondary btn-sm rounded-pill">Voltar à Vitrine</a>
+        </div>
+
+        @if (mensagemSucesso()) {
+            <div class="alert alert-success small py-2">{{ mensagemSucesso() }}</div>
+        }
+        @if (mensagemErro()) {
+            <div class="alert alert-danger small py-2">{{ mensagemErro() }}</div>
+        }
+
+        <form (submit)="salvarAlteracoes($event)">
+            <div class="mb-3">
+                <label class="form-label small text-secondary">Nome</label>
+                <input type="text" class="form-control" name="nome" [(ngModel)]="clienteForm.nome" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small text-secondary">E-mail</label>
+                <input type="email" class="form-control" name="email" [(ngModel)]="clienteForm.email" required>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label small text-secondary">Telefone</label>
+                    <input type="text" class="form-control" name="telefone" [(ngModel)]="clienteForm.telefone">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small text-secondary">Documento</label>
+                    <input type="text" class="form-control" name="documento" [(ngModel)]="clienteForm.documento">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small text-secondary">Endereço</label>
+                <input type="text" class="form-control" name="endereco" [(ngModel)]="clienteForm.endereco">
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small text-secondary">Senha</label>
+                <input type="password" class="form-control" name="senha" [(ngModel)]="clienteForm.senha" required>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm rounded-pill px-3"
+                    [disabled]="excluindo()"
+                    (click)="excluirConta()"
+                >
+                    {{ excluindo() ? 'A excluir...' : 'Excluir Conta' }}
+                </button>
+
+                <button type="submit" class="btn btn-success rounded-pill px-4" [disabled]="salvando()">
+                    {{ salvando() ? 'A guardar...' : 'Guardar Alterações' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

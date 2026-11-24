@@ -1,0 +1,27 @@
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+        <h3 class="text-center mb-4">Esqueci a Senha</h3>
+
+        @if (mensagemSucesso()) {
+            <div class="alert alert-success small py-2">{{ mensagemSucesso() }}</div>
+        }
+        @if (mensagemErro()) {
+            <div class="alert alert-danger small py-2">{{ mensagemErro() }}</div>
+        }
+
+        <form (submit)="enviarReset($event, emailInput.value)">
+            <div class="mb-3">
+                <label class="form-label">Informe o seu e-mail</label>
+                <input #emailInput type="email" class="form-control" placeholder="seuemail@exemplo.com" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-danger" [disabled]="enviando()">
+                    {{ enviando() ? 'Enviando...' : 'OK' }}
+                </button>
+            </div>
+            <div class="text-center mt-3">
+                <a routerLink="/login" class="text-decoration-none text-muted small">Voltar para o Login</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,140 @@
+<div class="container mb-5">
+    <h2 class="mb-4">Cesta de Compras</h2>
+
+    @if (mensagemErro()) {
+        <div class="alert alert-danger small py-2">{{ mensagemErro() }}</div>
+    }
+
+    <!-- Se houver itens na cesta -->
+    <div *ngIf="cartService.getItens().length > 0; else cestaVazia">
+        <div class="table-responsive shadow-sm rounded-4 overflow-hidden mb-4">
+            <table class="table align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="py-3 ps-4">Item</th>
+                        <th class="py-3 text-center">Qtd</th>
+                        <th class="py-3 text-end pe-4">Valor Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of cartService.getItens()">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <img [src]="item.imagem" alt="" class="rounded-3 me-3 object-fit-cover" style="width: 50px; height: 50px;">
+                                <span class="fw-semibold text-dark">{{ item.nome }}</span>
+                            </div>
+                        </td>
+                        <td class="text-center">{{ item.qtd }}x</td>
+                        <td class="text-end pe-4 fw-bold text-success">R$ {{ (item.preco * item.qtd).toFixed(2).replace('.', ',') }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="tipoEntrega" class="form-label text-secondary small">Tipo de Entrega</label>
+                    <select #tipoEntrega id="tipoEntrega" class="form-select">
+                        <option value="Entrega">Entrega</option>
+                        <option value="Retirada">Retirada na loja</option>
+                    </select>
+                </div>
+                <div class="col-md-8">
+                    <label for="obsPedido" class="form-label text-secondary small">Observação (opcional)</label>
+                    <input
+                        #obsPedido
+                        type="text"
+                        id="obsPedido"
+                        class="form-control"
+                        placeholder="Ex.: sem açúcar, entregar no portão..."
+                    >
+                </div>
+            </div>
+        </div>
+
+        <div class="text-end my-4">
+            <h4>Total: <span class="text-success">R$ {{ cartService.getTotal().toFixed(2).replace('.', ',') }}</span></h4>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <button type="button" (click)="limpar($event)" class="btn btn-outline-danger px-4 rounded-pill">Limpar Cesta</button>
+            <button
+                type="button"
+                (click)="finalizarPedido(tipoEntrega.value, obsPedido.value)"
+                [disabled]="enviandoPedido()"
+                class="btn btn-success btn-lg px-5 rounded-pill shadow-sm"
+            >
+                {{ enviandoPedido() ? 'Finalizando...' : 'Finalizar Compra' }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Caso a cesta esteja vazia -->
+    <ng-template #cestaVazia>
+        @if (pedidoService.ultimoPedido(); as confirmado) {
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-success-subtle text-dark">
+                <h4 class="fw-bold text-success mb-2">✅ Pedido Confirmado!</h4>
+                <p class="mb-1"><strong>Retorno do servidor:</strong> {{ confirmado.mensagemBackend || 'Pedido gravado com sucesso!' }}</p>
+                @if (confirmado.codigoPedido) {
+                    <p class="mb-1"><strong>Código do Pedido:</strong> #{{ confirmado.codigoPedido }}</p>
+                }
+                <p class="mb-1"><strong>Entrega:</strong> {{ confirmado.entrega }} | <strong>Data:</strong> {{ confirmado.dataPedido }}</p>
+                <p class="mb-3"><strong>Valor Total:</strong> R$ {{ confirmado.valorTotal.toFixed(2).replace('.', ',') }}</p>
+                <div>
+                    <a routerLink="/" class="btn btn-danger rounded-pill px-4 py-2">Ver Vitrine</a>
+                </div>
+            </div>
+        } @else {
+            <div class="text-center py-5 bg-light rounded-4 shadow-sm mb-4">
+                <h4 class="text-muted mb-3">A sua cesta está vazia 🛒</h4>
+                <p class="text-secondary mb-4">Explore a nossa vitrine e escolha deliciosos bolos caseiros!</p>
+                <a routerLink="/" class="btn btn-danger rounded-pill px-4 py-2">Ver Vitrine</a>
+            </div>
+        }
+    </ng-template>
+
+    <!-- Seção de Pedidos (realizados na sessão + consulta por código) -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mt-4">
+        <h5 class="fw-bold mb-3">Acompanhar Pedidos</h5>
+
+        <div class="input-group mb-3" style="max-width: 360px;">
+            <input #codPedidoInput type="number" min="1" class="form-control" placeholder="Código do pedido (ex.: 4)">
+            <button type="button" class="btn btn-outline-danger" (click)="buscarPedidoPorCodigo(codPedidoInput.value)">
+                Buscar
+            </button>
+        </div>
+
+        @if (erroConsulta()) {
+            <div class="alert alert-warning small py-2">{{ erroConsulta() }}</div>
+        }
+
+        @if (pedidoConsultado(); as p) {
+            <div class="alert alert-light border small mb-3">
+                <div><strong>Pedido #{{ p.codigoPedido }}</strong> — Cliente #{{ p.codigoCliente }}</div>
+                <div>Entrega: <strong>{{ p.entrega }}</strong> | Data: <strong>{{ p.dataPedido }}</strong></div>
+                <div>Total: <strong class="text-success">R$ {{ (p.valorTotal || 0).toFixed(2).replace('.', ',') }}</strong></div>
+                @if (p.obs) {
+                    <div>Obs.: {{ p.obs }}</div>
+                }
+            </div>
+        }
+
+        @if (pedidoService.pedidos().length > 0) {
+            <h6 class="text-secondary small fw-semibold mt-2">Pedidos realizados nesta sessão</h6>
+            <div class="list-group list-group-flush">
+                @for (itemPedido of pedidoService.pedidos(); track $index) {
+                    <div class="list-group-item px-0 d-flex justify-content-between align-items-center small">
+                        <div>
+                            <strong>{{ itemPedido.codigoPedido ? 'Pedido #' + itemPedido.codigoPedido : 'Pedido' }}</strong>
+                            — {{ itemPedido.entrega }} ({{ itemPedido.dataPedido }})
+                        </div>
+                        <span class="fw-bold text-success">
+                            R$ {{ itemPedido.valorTotal.toFixed(2).replace('.', ',') }}
+                        </span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

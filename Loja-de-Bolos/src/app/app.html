@@ -1,0 +1,30 @@
+<!-- TOPO FIXO DA LOJA -->
+<header class="container py-3">
+    <div class="row align-items-center">
+        <div class="col-4 col-md-3">
+            <a routerLink="/" class="h3 text-decoration-none text-danger fw-bold">Doce Pedaço</a>
+        </div>
+        <div class="col-8 col-md-6">
+            <form (submit)="irParaBusca($event)" class="d-flex">
+                <input id="termoBusca" class="form-control me-2 rounded-pill" type="search" placeholder="Pesquisar bolos...">
+                <button class="btn btn-outline-danger rounded-pill" type="submit">🔍</button>
+            </form>
+        </div>
+        <div class="col-12 col-md-3 text-end mt-2 mt-md-0 d-flex justify-content-end align-items-center gap-2">
+            @if (clienteService.clienteLogado(); as cliente) {
+                <span class="small fw-semibold text-dark text-truncate" style="max-width: 130px;" [title]="cliente.nome || cliente.email">
+                    👤 {{ cliente.nome || cliente.email }}
+                </span>
+                <button type="button" (click)="logout()" class="btn btn-outline-secondary btn-sm">Sair</button>
+            } @else {
+                <a routerLink="/login" class="btn btn-outline-dark btn-sm">👤 Entrar</a>
+            }
+            <a routerLink="/cesta" class="btn btn-danger btn-sm">🛒 Cesta</a>
+        </div>
+    </div>
+</header>
+
+<!-- AQUI O ANGULAR CARREGA CADA TELA DINAMICAMENTE -->
+<main class="container mb-5">
+    <router-outlet></router-outlet>
+</main>
